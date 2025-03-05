@@ -1,0 +1,76 @@
+stages:
+  - validate
+  - plan
+  - apply
+
+# -----------------------
+# project1 pipeline jobs
+# -----------------------
+project1_validate:
+  stage: validate
+  script:
+    - cd project1
+    - terraform init -backend=false
+    - terraform validate
+  only:
+    - merge_requests
+    - main
+    - develop
+
+project1_plan:
+  stage: plan
+  script:
+    - cd project1
+    - terraform init
+    - terraform plan
+  only:
+    - merge_requests
+    - main
+    - develop
+  when: manual
+
+project1_apply:
+  stage: apply
+  script:
+    - cd project1
+    - terraform init
+    - terraform apply -auto-approve
+  only:
+    - main
+  when: manual
+
+# -----------------------
+# project2 pipeline jobs
+# -----------------------
+project2_validate:
+  stage: validate
+  script:
+    - cd project2
+    - terraform init -backend=false
+    - terraform validate
+  only:
+    - merge_requests
+    - main
+    - develop
+
+project2_plan:
+  stage: plan
+  script:
+    - cd project2
+    - terraform init
+    - terraform plan
+  only:
+    - merge_requests
+    - main
+    - develop
+  when: manual
+
+project2_apply:
+  stage: apply
+  script:
+    - cd project2
+    - terraform init
+    - terraform apply -auto-approve
+  only:
+    - main
+  when: manual
