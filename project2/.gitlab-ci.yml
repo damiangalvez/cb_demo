@@ -17,6 +17,7 @@ before_script:
   - export AWS_WEB_IDENTITY_TOKEN_FILE=${CI_JOB_JWT}
   - export AWS_ROLE_ARN=${AWS_ROLE_ARN}
   - export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+  - cd project2
   - rm -rf .terraform
   - terraform --version
 
