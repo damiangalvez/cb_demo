@@ -41,7 +41,6 @@ project2_validate:
     - echo "Validating configuration files..."
     - terraform init -backend=false
     - terraform validate
-  needs: ["project2_fmt"]
   rules:
     - if: ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - changes:
@@ -52,15 +51,16 @@ project2_plan:
   stage: plan
   script:
     - terraform init
-    - terraform plan -out "planfile"
-  needs: ["project2_validate"]
+    - terraform plan -out=tfplan
   rules:
     - if: ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - changes:
       - project2/**/*
   artifacts:
+    name: "project2-plan"
     paths:
-      - planfile
+      - tfdplan
+    expire_in: 1 day
 
 project2_apply:
   stage: apply

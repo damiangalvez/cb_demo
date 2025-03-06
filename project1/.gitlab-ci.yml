@@ -8,7 +8,7 @@ stages:
   - apply
 
 image:
-  name: hashicorp/terraform:light
+  name: hashicorp/terraform:latest
   entrypoint:
     - '/usr/bin/env'
     - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
@@ -41,7 +41,6 @@ project1_validate:
     - echo "Validating configuration files..."
     - terraform init -backend=false
     - terraform validate
-  needs: ["project1_fmt"]
   rules:
     - if: ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - changes:
@@ -52,15 +51,16 @@ project1_plan:
   stage: plan
   script:
     - terraform init
-    - terraform plan -out "planfile"
-  needs: ["project1_validate"]
+    - terraform plan -out=tfplan
   rules:
     - if: ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - changes:
       - project1/**/*
   artifacts:
+    name: "project1-plan"
     paths:
-      - planfile
+      - tfplan
+    expire_in: 1 day
 
 project1_apply:
   stage: apply
