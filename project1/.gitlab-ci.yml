@@ -50,8 +50,6 @@ project1_plan:
   stage: plan
   script:
     - cd project1
-    - echo "$CI_JOB_JWT" > token
-    - export AWS_WEB_IDENTITY_TOKEN_FILE="${PWD}/token"
     - rm -rf .terraform
     - terraform --version
     - terraform init
