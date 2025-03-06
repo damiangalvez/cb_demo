@@ -29,11 +29,8 @@ project1_fmt:
     - echo "Checking configuration files format and style..."
     - terraform init -backend=false
     - terraform fmt -list=true -write=false -diff=true -check=true -recursive
-  only:
-    - merge_requests
-    - main
-    - develop
   rules:
+    - if: ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - changes:
       - project1/**/*
   when: always
@@ -46,11 +43,8 @@ project1_validate:
     - terraform validate
   needs: 
     - job: project1_fmt
-  only:
-    - merge_requests
-    - main
-    - develop
   rules:
+    - if: ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - changes:
       - project1/**/*
   when: always
@@ -62,11 +56,8 @@ project1_plan:
     - terraform plan -out "planfile"
   needs: 
     - job: project1_validate
-  only:
-    - merge_requests
-    - main
-    - develop
   rules:
+    - if: ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - changes:
       - project1/**/*
   artifacts:
@@ -80,9 +71,8 @@ project1_apply:
     - terraform apply -auto-approve -input=false "planfile"
   needs: 
     - job: project1_plan
-  only:
-    - main
   rules:
+    - if: $CI_COMMIT_BRANCH == "main"
     - changes:
       - project1/**/*
   when: manual
