@@ -30,7 +30,7 @@ project1_fmt:
     - terraform init -backend=false
     - terraform fmt -list=true -write=false -diff=true -check=true -recursive
   rules:
-    - if: ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop") && $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - changes:
       - project1/**/*
   when: always
@@ -42,7 +42,7 @@ project1_validate:
     - terraform init -backend=false
     - terraform validate
   rules:
-    - if: ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop") && $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if:1 $CI_PIPELINE_SOURCE == "merge_request_event"
     - changes:
       - project1/**/*
   when: always
