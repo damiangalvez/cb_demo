@@ -41,6 +41,7 @@ project2_validate:
     - echo "Validating configuration files..."
     - terraform init -backend=false
     - terraform validate
+  needs: ["project2_fmt"]
   rules:
     - if: ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - changes:
@@ -52,6 +53,7 @@ project2_plan:
   script:
     - terraform init
     - terraform plan -out "planfile"
+  needs: ["project2_validate"]
   rules:
     - if: ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - changes:
