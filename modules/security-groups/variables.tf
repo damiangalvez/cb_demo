@@ -7,7 +7,7 @@ variable "security_groups_config" {
   type = list(object({
     name        = string
     description = string
-    ingress     = list(object({
+    ingress = list(object({
       from_port        = number
       to_port          = number
       protocol         = string
