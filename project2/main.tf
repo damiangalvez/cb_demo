@@ -91,11 +91,11 @@ module "security_groups" {
 module "ec2" {
   source             = "../modules/ec2"
   instance_count     = 1
-  ami_id             = "ami-12345678"  # Replace with a valid AMI
+  ami_id             = "ami-05b10e08d247fb927" # Amazon Linux 2023 AMI - (64-bit (x86), uefi-preferred)
   instance_type      = "t3.micro"
   subnet_ids         = module.vpc.private_subnets
   security_group_ids = module.security_groups.security_group_ids
-  key_name           = "my_key_pair" # Replace with the key pair name or leave it blank
+  key_name           = "" # Replace with the key pair name or leave it blank
   tags = {
     Project = "project2"
   }
