@@ -7,8 +7,8 @@ before_script:
   - export AWS_WEB_IDENTITY_TOKEN_FILE=${CI_JOB_JWT}
   - export AWS_ROLE_ARN=${AWS_ROLE_ARN}
   - export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-  - echo "${MY_OIDC_TOKEN}" > ~/token
-  - export AWS_WEB_IDENTITY_TOKEN_FILE="~/token"
+  - echo "${MY_OIDC_TOKEN}" > /tmp/token
+  - export AWS_WEB_IDENTITY_TOKEN_FILE="/tmp/token"
 
 include:
   - local: "project1/.gitlab-ci.yml"
