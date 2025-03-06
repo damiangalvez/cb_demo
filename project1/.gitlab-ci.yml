@@ -42,7 +42,7 @@ project1_validate:
     - terraform init -backend=false
     - terraform validate
   rules:
-    - if:1 $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - changes:
       - project1/**/*
   when: always
