@@ -1,0 +1,88 @@
+variables:
+  AWS_DEFAULT_REGION: "us-east-1"
+
+stages:
+  - fmt
+  - validate
+  - plan
+  - apply
+
+image:
+  name: hashicorp/terraform:light
+  entrypoint:
+    - '/usr/bin/env'
+    - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+before_script:
+  - export AWS_WEB_IDENTITY_TOKEN_FILE=${CI_JOB_JWT}
+  - export AWS_ROLE_ARN=${AWS_ROLE_ARN}
+  - export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+  - rm -rf .terraform
+  - terraform --version
+
+# -----------------------
+# project2 pipeline jobs
+# -----------------------
+project2_fmt:
+  stage: fmt
+  script:
+    - echo "Checking configuration files format and style..."
+    - terraform init -backend=false
+    - terraform fmt -list=true -write=false -diff=true -check=true -recursive
+  only:
+    - merge_requests
+    - main
+    - develop
+  rules:
+    - changes:
+      - project1/**/*
+  when: always
+
+project2_validate:
+  stage: validate
+  script:
+    - echo "Validating configuration files..."
+    - terraform init -backend=false
+    - terraform validate
+  needs: 
+    - job: project1_fmt
+  only:
+    - merge_requests
+    - main
+    - develop
+  rules:
+    - changes:
+      - project1/**/*
+  when: always
+
+project2_plan:
+  stage: plan
+  script:
+    - terraform init
+    - terraform plan -out "planfile"
+  needs: 
+    - job: project1_validate
+  only:
+    - merge_requests
+    - main
+    - develop
+  rules:
+    - changes:
+      - project1/**/*
+  artifacts:
+    paths:
+      - planfile
+
+project2_apply:
+  stage: apply
+  script:
+    - terraform init
+    - terraform apply -auto-approve -input=false "planfile"
+  needs: 
+    - job: project1_plan
+  only:
+    - main
+  rules:
+    - changes:
+      - project1/**/*
+  when: manual
