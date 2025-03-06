@@ -41,8 +41,6 @@ project1_validate:
     - echo "Validating configuration files..."
     - terraform init -backend=false
     - terraform validate
-  needs: 
-    - job: project1_fmt
   rules:
     - if: ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - changes:
@@ -54,8 +52,6 @@ project1_plan:
   script:
     - terraform init
     - terraform plan -out "planfile"
-  needs: 
-    - job: project1_validate
   rules:
     - if: ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - changes:
@@ -69,8 +65,8 @@ project1_apply:
   script:
     - terraform init
     - terraform apply -auto-approve -input=false "planfile"
-  needs: 
-    - job: project1_plan
+  dependencies: 
+    - project1_plan
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
     - changes:

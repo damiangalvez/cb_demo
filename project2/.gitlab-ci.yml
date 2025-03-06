@@ -32,7 +32,7 @@ project2_fmt:
   rules:
     - if: ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - changes:
-      - project1/**/*
+      - project2/**/*
   when: always
 
 project2_validate:
@@ -41,12 +41,10 @@ project2_validate:
     - echo "Validating configuration files..."
     - terraform init -backend=false
     - terraform validate
-  needs: 
-    - job: project1_fmt
   rules:
     - if: ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - changes:
-      - project1/**/*
+      - project2/**/*
   when: always
 
 project2_plan:
@@ -54,12 +52,10 @@ project2_plan:
   script:
     - terraform init
     - terraform plan -out "planfile"
-  needs: 
-    - job: project1_validate
   rules:
     - if: ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - changes:
-      - project1/**/*
+      - project2/**/*
   artifacts:
     paths:
       - planfile
@@ -69,10 +65,10 @@ project2_apply:
   script:
     - terraform init
     - terraform apply -auto-approve -input=false "planfile"
-  needs: 
-    - job: project1_plan
+  dependencies: 
+    - project2_plan
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
     - changes:
-      - project1/**/*
+      - project2/**/*
   when: manual
