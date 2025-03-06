@@ -1,4 +1,8 @@
+variables:
+  AWS_DEFAULT_REGION: "us-east-1"
+
 stages:
+  - fmt
   - validate
   - plan
   - apply
@@ -6,9 +10,26 @@ stages:
 # -----------------------
 # project1 pipeline jobs
 # -----------------------
+project1_fmt:
+  stage: fmt
+  script:
+    - export AWS_WEB_IDENTITY_TOKEN_FILE=${CI_JOB_JWT}
+    - export AWS_ROLE_ARN=${AWS_ROLE_ARN}
+    - export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+    - cd project1
+    - terraform init -backend=false
+    - terraform fmt -list=true -write=false -diff=true -check=true -recursive
+  only:
+    - merge_requests
+    - main
+    - develop
+
 project1_validate:
   stage: validate
   script:
+    - export AWS_WEB_IDENTITY_TOKEN_FILE=${CI_JOB_JWT}
+    - export AWS_ROLE_ARN=${AWS_ROLE_ARN}
+    - export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
     - cd project1
     - terraform init -backend=false
     - terraform validate
@@ -20,6 +41,9 @@ project1_validate:
 project1_plan:
   stage: plan
   script:
+    - export AWS_WEB_IDENTITY_TOKEN_FILE=${CI_JOB_JWT}
+    - export AWS_ROLE_ARN=${AWS_ROLE_ARN}
+    - export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
     - cd project1
     - terraform init
     - terraform plan
@@ -32,6 +56,9 @@ project1_plan:
 project1_apply:
   stage: apply
   script:
+    - export AWS_WEB_IDENTITY_TOKEN_FILE=${CI_JOB_JWT}
+    - export AWS_ROLE_ARN=${AWS_ROLE_ARN}
+    - export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
     - cd project1
     - terraform init
     - terraform apply -auto-approve
@@ -42,9 +69,26 @@ project1_apply:
 # -----------------------
 # project2 pipeline jobs
 # -----------------------
+project2_fmt:
+  stage: fmt
+  script:
+    - export AWS_WEB_IDENTITY_TOKEN_FILE=${CI_JOB_JWT}
+    - export AWS_ROLE_ARN=${AWS_ROLE_ARN}
+    - export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+    - cd project1
+    - terraform init -backend=false
+    - terraform fmt -list=true -write=false -diff=true -check=true -recursive
+  only:
+    - merge_requests
+    - main
+    - develop
+
 project2_validate:
   stage: validate
   script:
+    - export AWS_WEB_IDENTITY_TOKEN_FILE=${CI_JOB_JWT}
+    - export AWS_ROLE_ARN=${AWS_ROLE_ARN}
+    - export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
     - cd project2
     - terraform init -backend=false
     - terraform validate
@@ -56,6 +100,9 @@ project2_validate:
 project2_plan:
   stage: plan
   script:
+    - export AWS_WEB_IDENTITY_TOKEN_FILE=${CI_JOB_JWT}
+    - export AWS_ROLE_ARN=${AWS_ROLE_ARN}
+    - export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
     - cd project2
     - terraform init
     - terraform plan
@@ -68,6 +115,9 @@ project2_plan:
 project2_apply:
   stage: apply
   script:
+    - export AWS_WEB_IDENTITY_TOKEN_FILE=${CI_JOB_JWT}
+    - export AWS_ROLE_ARN=${AWS_ROLE_ARN}
+    - export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
     - cd project2
     - terraform init
     - terraform apply -auto-approve
