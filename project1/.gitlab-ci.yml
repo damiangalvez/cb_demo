@@ -49,11 +49,9 @@ project1_validate:
 project1_plan:
   stage: plan
   script:
-    - echo $AWS_WEB_IDENTITY_TOKEN_FILE
-    - echo ${CI_JOB_JWT}
-    - echo $AWS_ROLE_ARN
-    - echo ${AWS_ROLE_ARN}
     - cd project1
+    - echo "$CI_JOB_JWT" > token
+    - export AWS_WEB_IDENTITY_TOKEN_FILE="${PWD}/token"
     - rm -rf .terraform
     - terraform --version
     - terraform init
@@ -75,7 +73,7 @@ project1_apply:
     - rm -rf .terraform
     - terraform --version
     - terraform init
-    - terraform apply -auto-approve -input=false "planfile"
+    - terraform apply -auto-approve -input=false tfplan
   dependencies: 
     - project1_plan
   rules:
