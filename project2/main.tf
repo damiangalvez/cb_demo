@@ -14,11 +14,11 @@ provider "aws" {
 
 # 1. VPC Module
 module "vpc" {
-  source                  = "../modules/vpc"
-  name                    = "project2-vpc"
-  cidr_block             = "10.20.0.0/16"
-  public_subnets_cidrs   = ["10.20.1.0/24", "10.20.2.0/24"]
-  private_subnets_cidrs  = ["10.20.11.0/24", "10.20.12.0/24"]
+  source                = "../modules/vpc"
+  name                  = "project2-vpc"
+  cidr_block            = "10.20.0.0/16"
+  public_subnets_cidrs  = ["10.20.1.0/24", "10.20.2.0/24"]
+  private_subnets_cidrs = ["10.20.11.0/24", "10.20.12.0/24"]
   tags = {
     Project = "project2"
   }
@@ -89,13 +89,13 @@ module "security_groups" {
 
 # 4. EC2 Module
 module "ec2" {
-  source              = "../modules/ec2"
-  instance_count      = 1
-  ami_id              = "ami-12345678"  # Replace with a valid AMI
-  instance_type       = "t3.micro"
-  subnet_ids          = module.vpc.private_subnets
-  security_group_ids  = module.security_groups.security_group_ids
-  key_name            = "my_key_pair" # Replace with the key pair name or leave it blank
+  source             = "../modules/ec2"
+  instance_count     = 1
+  ami_id             = "ami-12345678"  # Replace with a valid AMI
+  instance_type      = "t3.micro"
+  subnet_ids         = module.vpc.private_subnets
+  security_group_ids = module.security_groups.security_group_ids
+  key_name           = "my_key_pair" # Replace with the key pair name or leave it blank
   tags = {
     Project = "project2"
   }
