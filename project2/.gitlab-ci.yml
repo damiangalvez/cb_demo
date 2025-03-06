@@ -8,18 +8,10 @@ stages:
   - apply
 
 image:
-  name: hashicorp/terraform:light
+  name: hashicorp/terraform:latest
   entrypoint:
     - '/usr/bin/env'
     - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-
-before_script:
-  - export AWS_WEB_IDENTITY_TOKEN_FILE=${CI_JOB_JWT}
-  - export AWS_ROLE_ARN=${AWS_ROLE_ARN}
-  - export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-  - cd project2
-  - rm -rf .terraform
-  - terraform --version
 
 # -----------------------
 # project2 pipeline jobs
@@ -28,6 +20,9 @@ project2_fmt:
   stage: fmt
   script:
     - echo "Checking configuration files format and style..."
+    - cd project2
+    - rm -rf .terraform
+    - terraform --version
     - terraform init -backend=false
     - terraform fmt -list=true -write=false -diff=true -check=true -recursive
   rules:
@@ -40,6 +35,9 @@ project2_validate:
   stage: validate
   script:
     - echo "Validating configuration files..."
+    - cd project2
+    - rm -rf .terraform
+    - terraform --version
     - terraform init -backend=false
     - terraform validate
   rules:
@@ -51,6 +49,9 @@ project2_validate:
 project2_plan:
   stage: plan
   script:
+    - cd project2
+    - rm -rf .terraform
+    - terraform --version
     - terraform init
     - terraform plan -out=tfplan
   rules:
@@ -66,6 +67,9 @@ project2_plan:
 project2_apply:
   stage: apply
   script:
+    - cd project2
+    - rm -rf .terraform
+    - terraform --version
     - terraform init
     - terraform apply -auto-approve -input=false "planfile"
   dependencies: 
