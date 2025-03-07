@@ -2,6 +2,8 @@ stages:
   - fmt
   - validate
   - plan
+  - json
+  - opa_validation
   - apply
 
 image:
@@ -61,6 +63,40 @@ project1_plan:
     paths:
       - project1/tfplan
     expire_in: 1 day
+
+project1_json:
+  stage: json
+  extends: .assume-role
+  script:
+    - cd project1
+    - rm -rf .terraform
+    - terraform init
+    - terraform show -json tfplan > tfplan.json
+  dependencies: 
+    - project1_plan
+  rules:
+    - if: ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop") && $CI_PIPELINE_SOURCE == "merge_request_event"
+    - changes:
+      - project1/**/*
+  artifacts:
+    name: "project1-json"
+    paths:
+      - project1/tfplan.json
+
+project1_opa_validation:
+  stage: opa_validation
+  script:
+    - ./opa eval 'data.terraform.policies.sg.allow' -d policies/ -i project1/tfplan.json
+  dependencies: 
+    - project1_json
+  rules:
+    - if: ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop") && $CI_PIPELINE_SOURCE == "merge_request_event"
+    - changes:
+      - project1/**/*
+  before_script:
+    - wget -O opa https://openpolicyagent.org/downloads/v1.2.0/opa_linux_amd64_static
+    - chmod 755 opa
+    - ./opa version
 
 project1_apply:
   stage: apply
