@@ -66,6 +66,7 @@ project2_plan:
 
 project2_json:
   stage: json
+  extends: .assume-role
   script:
     - cd project2
     - rm -rf .terraform
