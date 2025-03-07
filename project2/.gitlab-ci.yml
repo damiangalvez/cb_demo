@@ -59,7 +59,7 @@ project2_plan:
   artifacts:
     name: "project2-plan"
     paths:
-      - tfdplan
+      - project2/tfplan
     expire_in: 1 day
 
 project2_apply:
