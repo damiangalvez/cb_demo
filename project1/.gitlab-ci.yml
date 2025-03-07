@@ -1,6 +1,3 @@
-variables:
-  AWS_DEFAULT_REGION: "us-east-1"
-
 stages:
   - fmt
   - validate
@@ -13,13 +10,6 @@ image:
     - '/usr/bin/env'
     - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
-before_script:
-  - export AWS_WEB_IDENTITY_TOKEN_FILE=${CI_JOB_JWT}
-  - export AWS_ROLE_ARN=${AWS_ROLE_ARN}
-  - export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-  - rm -rf .terraform
-  - terraform --version
-
 # -----------------------
 # project1 pipeline jobs
 # -----------------------
@@ -27,10 +17,13 @@ project1_fmt:
   stage: fmt
   script:
     - echo "Checking configuration files format and style..."
+    - cd project1
+    - rm -rf .terraform
+    - terraform --version
     - terraform init -backend=false
     - terraform fmt -list=true -write=false -diff=true -check=true -recursive
   rules:
-    - if: ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop") && $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - changes:
       - project1/**/*
   when: always
@@ -39,17 +32,24 @@ project1_validate:
   stage: validate
   script:
     - echo "Validating configuration files..."
+    - cd project1
+    - rm -rf .terraform
+    - terraform --version
     - terraform init -backend=false
     - terraform validate
   rules:
-    - if: ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop") && $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - changes:
       - project1/**/*
   when: always
 
 project1_plan:
   stage: plan
+  extends: .assume-role
   script:
+    - cd project1
+    - rm -rf .terraform
+    - terraform --version
     - terraform init
     - terraform plan -out=tfplan
   rules:
@@ -59,14 +59,18 @@ project1_plan:
   artifacts:
     name: "project1-plan"
     paths:
-      - tfplan
+      - project1/tfplan
     expire_in: 1 day
 
 project1_apply:
   stage: apply
+  extends: .assume-role
   script:
+    - cd project1
+    - rm -rf .terraform
+    - terraform --version
     - terraform init
-    - terraform apply -auto-approve -input=false "planfile"
+    - terraform apply -auto-approve -input=false tfplan
   dependencies: 
     - project1_plan
   rules:
