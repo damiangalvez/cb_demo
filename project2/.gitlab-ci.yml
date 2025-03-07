@@ -68,6 +68,8 @@ project2_json:
   stage: json
   script:
     - cd project2
+    - rm -rf .terraform
+    - terraform init
     - terraform show -json tfplan > tfplan.json
   dependencies: 
     - project2_plan
