@@ -2,6 +2,7 @@ stages:
   - fmt
   - validate
   - plan
+  - jsonify
   - apply
 
 image:
@@ -61,6 +62,36 @@ project1_plan:
     paths:
       - project1/tfplan
     expire_in: 1 day
+
+project1_json:
+  stage: jsonify
+  script:
+    - terraform show -json tfplan > tfplan.json
+  dependencies: 
+    - project1_plan
+  rules:
+    - if: ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop") && $CI_PIPELINE_SOURCE == "merge_request_event"
+    - changes:
+      - project1/**/*
+  artifacts:
+    name: "project1-json"
+    paths:
+      - project1/tfplan.json
+
+project1_opa_validation:
+  stage: opa_validation
+  script:
+    - ./opa eval 'data.terraform.policies.sg.allow' -d ../policies/ -i tfplan.json
+  dependencies: 
+    - project1_json
+  rules:
+    - if: ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop") && $CI_PIPELINE_SOURCE == "merge_request_event"
+    - changes:
+      - project1/**/*
+  before_script:
+    - wget -O opa https://github.com/open-policy-agent/opa/releases/download/v1.2.0/opa_linux_amd64
+    - chmod 755 opa
+    - ./opa version
 
 project1_apply:
   stage: apply
