@@ -67,28 +67,29 @@ project2_plan:
 project2_json:
   stage: json
   script:
+    - cd project2
     - terraform show -json tfplan > tfplan.json
   dependencies: 
-    - project1_plan
+    - project2_plan
   rules:
     - if: ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - changes:
-      - project1/**/*
+      - project2/**/*
   artifacts:
-    name: "project1-json"
+    name: "project2-json"
     paths:
-      - project1/tfplan.json
+      - project2/tfplan.json
 
 project2_opa_validation:
   stage: opa_validation
   script:
-    - ./opa eval 'data.terraform.policies.sg.allow' -d ../policies/ -i tfplan.json
+    - ./opa eval 'data.terraform.policies.sg.allow' -d policies/ -i project2/tfplan.json
   dependencies: 
-    - project1_json
+    - project2_json
   rules:
     - if: ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - changes:
-      - project1/**/*
+      - project2/**/*
   before_script:
     - wget -O opa https://openpolicyagent.org/downloads/v1.2.0/opa_linux_amd64_static
     - chmod 755 opa

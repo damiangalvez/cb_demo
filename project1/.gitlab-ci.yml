@@ -67,6 +67,7 @@ project1_plan:
 project1_json:
   stage: json
   script:
+    - cd project1
     - terraform show -json tfplan > tfplan.json
   dependencies: 
     - project1_plan
@@ -82,7 +83,7 @@ project1_json:
 project1_opa_validation:
   stage: opa_validation
   script:
-    - ./opa eval 'data.terraform.policies.sg.allow' -d ../policies/ -i tfplan.json
+    - ./opa eval 'data.terraform.policies.sg.allow' -d policies/ -i project1/tfplan.json
   dependencies: 
     - project1_json
   rules:
