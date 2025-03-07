@@ -89,7 +89,7 @@ project1_opa_validation:
     - changes:
       - project1/**/*
   before_script:
-    - wget -O opa https://github.com/open-policy-agent/opa/releases/download/v1.2.0/opa_linux_amd64
+    - wget -O opa https://openpolicyagent.org/downloads/v1.2.0/opa_linux_amd64_static
     - chmod 755 opa
     - ./opa version
 
