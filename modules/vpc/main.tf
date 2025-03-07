@@ -34,10 +34,10 @@ resource "aws_subnet" "public" {
 }
 
 resource "aws_subnet" "private" {
-  count              = length(var.private_subnets_cidrs)
-  vpc_id             = aws_vpc.this.id
-  cidr_block         = var.private_subnets_cidrs[count.index]
-  availability_zone  = data.aws_availability_zones.available.names[count.index]
+  count             = length(var.private_subnets_cidrs)
+  vpc_id            = aws_vpc.this.id
+  cidr_block        = var.private_subnets_cidrs[count.index]
+  availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = merge(
     var.tags,
