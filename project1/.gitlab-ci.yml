@@ -3,6 +3,7 @@ stages:
   - validate
   - plan
   - json
+  - opa_validation
   - apply
 
 image:
