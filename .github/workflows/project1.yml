@@ -83,7 +83,7 @@ jobs:
         if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/develop') }}
         run: |
           opa version
-          opa eval 'data.terraform.policies.sg.allow' -d ${{ GITHUB_WORKSPACE }}/policies/ -i tfplan.json
+          opa eval 'data.terraform.policies.sg.allow' -d ${GITHUB_WORKSPACE}/policies/ -i tfplan.json
 
       # 10. Terraform Apply
       - name: Terraform Apply
