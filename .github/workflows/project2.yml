@@ -1,0 +1,100 @@
+name: Project2 Pipeline
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+    paths:
+      - "cb_demo/project2/**/*"
+      - ".github/workflows/project2.yml"
+  pull_request:
+    branches: [ "main", "develop" ]
+    paths:
+      - "cb_demo/project2/**/*"
+      - ".github/workflows/project2.yml"
+
+jobs:
+  project2:
+    name: Project2 Pipeline
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./project2
+
+    permissions:
+      id-token: write   # Required for OIDC
+      contents: read    # Allows checkout of the repo
+
+    steps:
+      # 1. Checkout
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Terraform CLI install
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      # 3. Configure AWS Credentials via OIDC
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}  # Set in GitHub > Settings > Secrets > Actions
+          aws-region: us-east-1
+
+      # 4. Terraform FMT
+      - name: Terraform FMT
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          rm -rf .terraform
+          terraform init -backend=false
+          terraform fmt -list=true -write=false -diff=true -check=true -recursive
+
+      # 5. Terraform Validate
+      - name: Terraform Validate
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          rm -rf .terraform
+          terraform init -backend=false
+          terraform validate
+
+      # 6. Terraform Plan
+      - name: Terraform Plan
+        if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')) }}
+        run: |
+          rm -rf .terraform
+          terraform init
+          terraform plan -out=tfplan
+      - name: Upload Plan
+        if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')) }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan
+          path: tfplan
+
+      # 7. Terraform Show JSON
+      - name: Terraform Show JSON
+        if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')) }}
+        run: |
+          rm -rf .terraform
+          terraform init
+          terraform show -json tfplan | grep '^{.*}$' > tfplan.json
+
+      # 8. OPA CLI Install
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+
+      # 9. OPA Validation
+      - name: OPA Validation
+        if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/develop') }}
+        run: |
+          opa version
+          opa eval 'data.terraform.policies.sg.allow' -d ${{ GITHUB_WORKSPACE }}/policies/ -i tfplan.json
+
+      # 10. Terraform Apply
+      - name: Terraform Apply
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        run: |
+          rm -rf .terraform
+          terraform init
+          terraform apply -auto-approve -input=false tfplan
